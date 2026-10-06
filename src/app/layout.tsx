@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="km" className={`${inter.variable} ${kantumruy.variable}`}>
+    <html lang="km" suppressHydrationWarning className={`${inter.variable} ${kantumruy.variable}`}>
       <head>
         {/* Telegram WebApp JavaScript SDK */}
         <Script
@@ -35,7 +35,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="font-kmer antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
+      <body suppressHydrationWarning className="font-kmer antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
         {children}
       </body>
     </html>
