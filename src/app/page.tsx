@@ -10,12 +10,7 @@ import { TelegramUser } from '@/types/telegram';
 import { History } from 'lucide-react';
 
 export default function HomePage() {
-  const [currentUser, setCurrentUser] = useState<TelegramUser | null>({
-    id: 108234912,
-    first_name: 'Khmer',
-    last_name: 'Engineer',
-    username: 'khmerengineer',
-  });
+  const [currentUser, setCurrentUser] = useState<TelegramUser | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [refreshCounter, setRefreshCounter] = useState(0);
 

@@ -84,10 +84,17 @@ export function formatReportTelegramMessage(report: DailyReportData): string {
     report.weather.includes('cloudy') ? '☁️' : 
     report.weather.includes('rainy') ? '🌧️' : '⛅';
 
+  // Make reporter name clickable to their Telegram profile (opens profile & photo)
+  const reporterLink = report.telegram_user_id && report.telegram_user_id > 0
+    ? `<a href="tg://user?id=${report.telegram_user_id}"><b>${report.reporter_name}</b></a>`
+    : `<b>${report.reporter_name}</b>`;
+
+  const usernameTag = report.telegram_username ? ` (@${report.telegram_username})` : '';
+
   return `
 📋 <b>របាយការណ៍ការងារប្រចាំថ្ងៃ (DAILY SITE REPORT)</b>
 ━━━━━━━━━━━━━━━━━━━━
-👷 <b>អ្នករាយការណ៍:</b> ${report.reporter_name} ${report.telegram_username ? `(@${report.telegram_username})` : ''}
+👷 <b>អ្នករាយការណ៍:</b> ${reporterLink}${usernameTag}
 📌 <b>ការងារ / Task:</b> ${report.assigned_task}
 📅 <b>កាលបរិច្ឆេទ:</b> ${report.report_date}
 ${weatherEmoji} <b>អាកាសធាតុ:</b> ${report.weather}

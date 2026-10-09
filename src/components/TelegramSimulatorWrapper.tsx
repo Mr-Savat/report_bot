@@ -16,10 +16,10 @@ export default function TelegramSimulatorWrapper({
   const [viewMode, setViewMode] = useState<'desktop-modal' | 'mobile' | 'fullscreen'>('desktop-modal');
   const [isInsideTelegram, setIsInsideTelegram] = useState(false);
   const [mockUser, setMockUser] = useState<TelegramUser>({
-    id: 108234912,
-    first_name: 'Khmer',
-    last_name: 'Engineer',
-    username: 'khmerengineer',
+    id: 1728879425,
+    first_name: 'Mr.',
+    last_name: 'Savat',
+    username: 'Mr_Savat',
   });
 
   useEffect(() => {

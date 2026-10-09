@@ -56,11 +56,11 @@ export default function TelegramApprovalCard() {
 
             <div className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
               <CheckCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>APPROVED by @khmerengineer</span>
+              <span>APPROVED by Admin</span>
             </div>
 
             <div className="text-slate-600 dark:text-slate-400 pl-4 space-y-0.5">
-              <p>Approver: Khmer Engineer (@khmerengineer)</p>
+              <p>Approver: Admin (@Mr_Savat)</p>
               <p className="flex items-center gap-1">
                 <Clock className="w-3 h-3 text-slate-400" />
                 Time: 04-Oct-2026 09:16 PM

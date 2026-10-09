@@ -25,6 +25,12 @@ interface ReportFormProps {
 
 export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps) {
   // Form States
+  const [reporterName, setReporterName] = useState(() => {
+    if (currentUser) {
+      return `${currentUser.first_name} ${currentUser.last_name || ''}`.trim();
+    }
+    return '';
+  });
   const [assignedTask, setAssignedTask] = useState('SAMPLE - Mobilization & site setup · TSK-SAMPLE-09-1');
   const [reportDate, setReportDate] = useState(() => {
     const today = new Date();
@@ -37,6 +43,14 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
   const [issuesAndObstacles, setIssuesAndObstacles] = useState('មិនមានការរាំងស្ទះដំណើរការងារនោះឡើយ');
   const [tomorrowsPlan, setTomorrowsPlan] = useState('រៀបចំសរសៃដែកគ្រឹះដាក់ចូល និងចាក់បេតុងសសរគ្រឹះ');
 
+  // Sync reporter name when Telegram user loads
+  useEffect(() => {
+    if (currentUser && !reporterName) {
+      const name = `${currentUser.first_name} ${currentUser.last_name || ''}`.trim();
+      setReporterName(name);
+    }
+  }, [currentUser]);
+
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
@@ -47,6 +61,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
       const savedDraft = localStorage.getItem('cambo_bim_report_draft');
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
+        if (parsed.reporterName) setReporterName(parsed.reporterName);
         if (parsed.workSummary) setWorkSummary(parsed.workSummary);
         if (parsed.qualityAndSafety) setQualityAndSafety(parsed.qualityAndSafety);
         if (parsed.issuesAndObstacles) setIssuesAndObstacles(parsed.issuesAndObstacles);
@@ -68,6 +83,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
   const handleSaveDraft = () => {
     triggerHaptic('light');
     const draft = {
+      reporterName,
       assignedTask,
       reportDate,
       weather,
@@ -101,14 +117,13 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
     setStatusMessage(null);
     triggerHaptic('medium');
 
-    const reporterName = currentUser
-      ? `${currentUser.first_name} ${currentUser.last_name || ''}`.trim()
-      : 'Khmer Engineer';
+    const finalReporterName = reporterName.trim() ||
+      (currentUser ? `${currentUser.first_name} ${currentUser.last_name || ''}`.trim() : 'វិស្វករការដ្ឋាន');
 
     const payload = {
-      telegram_user_id: currentUser?.id || 108234912,
-      telegram_username: currentUser?.username || 'khmerengineer',
-      reporter_name: reporterName,
+      telegram_user_id: currentUser?.id || 0,
+      telegram_username: currentUser?.username || '',
+      reporter_name: finalReporterName,
       assigned_task: assignedTask,
       report_date: reportDate,
       weather,
@@ -179,6 +194,30 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
           <span>{statusMessage.text}</span>
         </div>
       )}
+
+      {/* 0. Reporter Name Field */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-800 space-y-2">
+        <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200">
+          ឈ្មោះអ្នករាយការណ៍ <span className="text-rose-500">*</span>
+          <span className="block text-[11px] font-normal text-slate-500 dark:text-slate-400">
+            Reporter name (ឈ្មោះវិស្វកររាយការណ៍)
+          </span>
+        </label>
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            value={reporterName}
+            onChange={(e) => setReporterName(e.target.value)}
+            placeholder="បញ្ចូលឈ្មោះរបស់អ្នក (ឧ. សុវត្ថិ ឬ Mr. Savat)"
+            className="w-full text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-100 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all"
+          />
+          {currentUser?.username && (
+            <span className="absolute right-3 text-[11px] text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-950/80 px-2 py-0.5 rounded-md border border-blue-200/50">
+              @{currentUser.username}
+            </span>
+          )}
+        </div>
+      </div>
 
       {/* 1. Assigned Task Section */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-800 space-y-2">
