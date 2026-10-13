@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar, 
   Clock, 
@@ -14,9 +14,36 @@ import {
   CheckCircle2, 
   AlertCircle,
   Sparkles,
-  Loader2
+  Loader2,
+  X,
+  Trash2
 } from 'lucide-react';
 import { TelegramUser } from '@/types/telegram';
+import StatusModal from './StatusModal';
+import CustomDropdown, { DropdownOption } from './CustomDropdown';
+
+const TASK_OPTIONS: DropdownOption[] = [
+  {
+    value: 'SAMPLE - Mobilization & site setup · TSK-SAMPLE-09-1',
+    label: 'SAMPLE - Mobilization & site setup',
+    code: 'TSK-SAMPLE-09-1',
+  },
+  {
+    value: 'Structural Framing & Rebar Inspection · TSK-STRUCT-01',
+    label: 'Structural Framing & Rebar Inspection',
+    code: 'TSK-STRUCT-01',
+  },
+  {
+    value: 'HVAC & MEP Pipe Installation Level 2 · TSK-MEP-03',
+    label: 'HVAC & MEP Pipe Installation Level 2',
+    code: 'TSK-MEP-03',
+  },
+  {
+    value: 'Plastering & Tile Works Block B · TSK-FINISH-08',
+    label: 'Plastering & Tile Works Block B',
+    code: 'TSK-FINISH-08',
+  },
+];
 
 interface ReportFormProps {
   currentUser?: TelegramUser | null;
@@ -24,6 +51,8 @@ interface ReportFormProps {
 }
 
 export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps) {
+  const workSummaryRef = useRef<HTMLTextAreaElement>(null);
+
   // Form States
   const [reporterName, setReporterName] = useState(() => {
     if (currentUser) {
@@ -55,19 +84,24 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
+  const [hasSavedDraft, setHasSavedDraft] = useState(false);
+
   // Load draft from localStorage on mount
   useEffect(() => {
     try {
       const savedDraft = localStorage.getItem('qb_report_draft');
       if (savedDraft) {
+        setHasSavedDraft(true);
         const parsed = JSON.parse(savedDraft);
         if (parsed.reporterName) setReporterName(parsed.reporterName);
+        if (parsed.assignedTask) setAssignedTask(parsed.assignedTask);
+        if (parsed.reportDate) setReportDate(parsed.reportDate);
+        if (parsed.weather) setWeather(parsed.weather);
+        if (parsed.startTime) setStartTime(parsed.startTime);
         if (parsed.workSummary) setWorkSummary(parsed.workSummary);
         if (parsed.qualityAndSafety) setQualityAndSafety(parsed.qualityAndSafety);
         if (parsed.issuesAndObstacles) setIssuesAndObstacles(parsed.issuesAndObstacles);
         if (parsed.tomorrowsPlan) setTomorrowsPlan(parsed.tomorrowsPlan);
-        if (parsed.assignedTask) setAssignedTask(parsed.assignedTask);
-        if (parsed.weather) setWeather(parsed.weather);
       }
     } catch {
       // ignore storage errors
@@ -77,6 +111,22 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
   const triggerHaptic = (style: 'light' | 'medium' | 'heavy' = 'light') => {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp?.HapticFeedback) {
       window.Telegram.WebApp.HapticFeedback.impactOccurred(style);
+    }
+  };
+
+  const handleClearDraft = () => {
+    try {
+      localStorage.removeItem('qb_report_draft');
+      setHasSavedDraft(false);
+      setWorkSummary('');
+      triggerHaptic('light');
+      setStatusMessage({
+        type: 'info',
+        text: '🗑️ បានសម្អាតសេចក្តីព្រាង (Draft Cleared) រួចរាល់!',
+      });
+      setTimeout(() => setStatusMessage(null), 2500);
+    } catch {
+      // ignore
     }
   };
 
@@ -95,6 +145,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem('qb_report_draft', JSON.stringify(draft));
+    setHasSavedDraft(true);
     setStatusMessage({
       type: 'info',
       text: '💾 បានរក្សាទុកក្នុងសេចក្តីព្រាង (Draft Saved) ដោយជោគជ័យ!',
@@ -153,6 +204,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
           text: '🎉 របាយការណ៍ត្រូវបានបញ្ជូនជោគជ័យ! ទិន្នន័យត្រូវបានរក្សាទុក និងផ្ញើទៅកាន់ក្រុម Telegram។',
         });
         localStorage.removeItem('qb_report_draft');
+        setHasSavedDraft(false);
         setWorkSummary('');
         if (onSubmitted) onSubmitted();
       } else {
@@ -173,24 +225,35 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
 
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-5 pb-24">
-      {/* Toast Alert Banner */}
-      {statusMessage && (
-        <div
-          className={`p-4 rounded-2xl flex items-center gap-2.5 text-xs sm:text-sm font-medium transition-all shadow-xs ${
-            statusMessage.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800'
-              : statusMessage.type === 'error'
-              ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800'
-              : 'bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
-          }`}
-        >
-          {statusMessage.type === 'success' ? (
-            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          ) : statusMessage.type === 'error' ? (
-            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
-          ) : (
-            <Sparkles className="w-5 h-5 shrink-0 text-blue-600 dark:text-blue-400" />
-          )}
+      {/* Reusable Status Modal */}
+      <StatusModal
+        isOpen={Boolean(statusMessage && (statusMessage.type === 'success' || statusMessage.type === 'error'))}
+        type={statusMessage?.type || 'info'}
+        message={statusMessage?.text || ''}
+        onClose={() => setStatusMessage(null)}
+        primaryButtonText={statusMessage?.type === 'success' ? '✅ រួចរាល់ (បិទកម្មវិធី)' : 'យល់ព្រម (ត្រឡប់ទៅបំពេញ)'}
+        onPrimaryClick={() => {
+          if (statusMessage?.type === 'success') {
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+              window.Telegram.WebApp.close();
+            } else {
+              setStatusMessage(null);
+            }
+          } else {
+            setStatusMessage(null);
+            setTimeout(() => {
+              workSummaryRef.current?.focus();
+            }, 150);
+          }
+        }}
+        secondaryButtonText={statusMessage?.type === 'success' ? '📝 បំពេញរបាយការណ៍ថ្មី' : undefined}
+        onSecondaryClick={() => setStatusMessage(null)}
+      />
+
+      {/* Floating Pill Toast for Draft Saved (Info) */}
+      {statusMessage && statusMessage.type === 'info' && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-slate-900/90 dark:bg-white/90 text-white dark:text-slate-900 text-xs font-semibold shadow-xl backdrop-blur-md flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <Sparkles className="w-4 h-4 text-amber-400 dark:text-amber-600" />
           <span>{statusMessage.text}</span>
         </div>
       )}
@@ -227,37 +290,14 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
             </div>
           </div>
 
-          {/* Assigned Task */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
-              ការងារដែលបានប្រគល់ <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <select
-                value={assignedTask}
-                onChange={(e) => setAssignedTask(e.target.value)}
-                className="w-full text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-800 dark:text-slate-100 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all appearance-none cursor-pointer"
-              >
-                <option value="SAMPLE - Mobilization & site setup · TSK-SAMPLE-09-1">
-                  SAMPLE - Mobilization & site setup · TSK-SAMPLE-09-1
-                </option>
-                <option value="Structural Framing & Rebar Inspection · TSK-STRUCT-01">
-                  Structural Framing & Rebar Inspection · TSK-STRUCT-01
-                </option>
-                <option value="HVAC & MEP Pipe Installation Level 2 · TSK-MEP-03">
-                  HVAC & MEP Pipe Installation Level 2 · TSK-MEP-03
-                </option>
-                <option value="Plastering & Tile Works Block B · TSK-FINISH-08">
-                  Plastering & Tile Works Block B · TSK-FINISH-08
-                </option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          {/* Assigned Task (Custom Reusable Dropdown) */}
+          <CustomDropdown
+            label="ការងារដែលបានប្រគល់"
+            required
+            options={TASK_OPTIONS}
+            value={assignedTask}
+            onChange={setAssignedTask}
+          />
         </div>
 
         {/* 3-column row: Date, Weather, Start Time */}
@@ -342,6 +382,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
             ពិពណ៌នាការងារជាក់ស្តែង <span className="text-rose-500">*</span>
           </label>
           <textarea
+            ref={workSummaryRef}
             rows={4}
             value={workSummary}
             onChange={(e) => setWorkSummary(e.target.value)}
@@ -410,6 +451,19 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 p-3 sm:p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-end gap-3 px-2 sm:px-4">
+          {/* Clear Draft Button (visible if saved draft exists) */}
+          {hasSavedDraft && (
+            <button
+              type="button"
+              onClick={handleClearDraft}
+              className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-medium text-xs sm:text-sm transition-all cursor-pointer active:scale-98"
+              title="លុបសេចក្តីព្រាង"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">លុបព្រាង</span>
+            </button>
+          )}
+
           {/* Draft Button */}
           <button
             type="button"
