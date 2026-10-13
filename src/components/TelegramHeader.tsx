@@ -25,10 +25,10 @@ export default function TelegramHeader({
           </div>
           <div>
             <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
-              របាយការណ៍ការដ្ឋានប្រចាំថ្ងៃ
+              របាយការណ៍ការងារប្រចាំថ្ងៃ
             </h1>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-              Daily Construction Site Report
+            <p className="text-[11px] sm:text-xs text-blue-600 dark:text-blue-400 font-semibold">
+              QB Tech Solution · Daily Work Report
             </p>
           </div>
         </div>

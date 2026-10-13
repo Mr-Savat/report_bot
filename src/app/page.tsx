@@ -61,6 +61,21 @@ export default function HomePage() {
       }
     }
 
+    // Fallback for testing in browser (localhost) outside Telegram.
+    // id: 0 is intentional (falsy) -> server treats it as "no Telegram user" and applies the
+    // dev bypass in /api/auth/verify-member and /api/reports. A fake real ID would be
+    // checked against the Telegram group and denied.
+    if (!detectedUser && process.env.NODE_ENV === 'development') {
+      const savedMockName = typeof window !== 'undefined' ? localStorage.getItem('qb_reporter_name') : null;
+      detectedUser = {
+        id: 0,
+        first_name: savedMockName || 'QB Engineer',
+        last_name: '',
+        username: '',
+      };
+      setCurrentUser(detectedUser);
+    }
+
     verifyMembership(detectedUser);
   }, [verifyMembership]);
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveReport, getReports, DailyReportData } from '@/lib/supabase';
-import { formatReportTelegramMessage, sendTelegramMessage, checkGroupMembership } from '@/lib/telegram';
+import { formatReportTelegramMessage, sendTelegramMessage, sendTelegramPhotos, sendTelegramReport, checkGroupMembership } from '@/lib/telegram';
 
 export async function GET() {
   const reports = await getReports();
@@ -44,9 +44,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Send Telegram notification if configured
-    const message = formatReportTelegramMessage(body);
-    const notifyResult = await sendTelegramMessage(message);
+    // 2. Send single unified Telegram notification (photo + report caption together in 1 post)
+    const notifyResult = await sendTelegramReport(body);
 
     return NextResponse.json({
       success: true,

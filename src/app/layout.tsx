@@ -17,8 +17,8 @@ const kantumruy = Kantumruy_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "QB Report - Daily Site Report",
-  description: "Telegram Mini App for QB Tech Solution Daily Construction Site Report",
+  title: "QB Report - Daily Work Report",
+  description: "Telegram Mini App for QB Tech Solution Daily Work & Engineering Report",
 };
 
 export default function RootLayout({

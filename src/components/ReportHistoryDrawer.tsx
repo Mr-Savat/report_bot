@@ -107,19 +107,35 @@ export default function ReportHistoryDrawer({
                 <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-[11px]">
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    {item.report_date} · {item.start_time}
+                    {item.report_date} {item.start_time ? `· ${item.start_time}` : ''}
                   </span>
                   <span className="flex items-center gap-1">
-                    {item.weather.includes('Sunny') ? (
-                      <Sun className="w-3 h-3 text-amber-500" />
-                    ) : item.weather.includes('Cloudy') ? (
-                      <Cloud className="w-3 h-3 text-sky-400" />
-                    ) : (
-                      <CloudRain className="w-3 h-3 text-blue-500" />
-                    )}
-                    {item.weather.split('·')[0]}
+                    {item.work_hours ? (
+                      <span>⏱️ {item.work_hours.split('(')[0].trim()}</span>
+                    ) : item.weather?.includes('Sunny') ? (
+                      <>
+                        <Sun className="w-3 h-3 text-amber-500" />
+                        <span>{item.weather.split('·')[0]}</span>
+                      </>
+                    ) : item.weather?.includes('Cloudy') ? (
+                      <>
+                        <Cloud className="w-3 h-3 text-sky-400" />
+                        <span>{item.weather.split('·')[0]}</span>
+                      </>
+                    ) : item.weather ? (
+                      <>
+                        <CloudRain className="w-3 h-3 text-blue-500" />
+                        <span>{item.weather.split('·')[0]}</span>
+                      </>
+                    ) : null}
                   </span>
                 </div>
+
+                {item.project_name && (
+                  <div className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
+                    💻 {item.project_name}
+                  </div>
+                )}
 
                 <div className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-800 text-slate-700 dark:text-slate-300">
                   <p className="font-medium text-[11px] text-slate-500 dark:text-slate-400 mb-0.5">
@@ -127,6 +143,21 @@ export default function ReportHistoryDrawer({
                   </p>
                   <p className="line-clamp-2">{item.work_summary}</p>
                 </div>
+
+                {item.images && item.images.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {item.images.map((img) => (
+                      <div key={img.id} className="relative rounded-lg overflow-hidden border border-slate-200/80 dark:border-slate-700/80 bg-slate-900">
+                        <img src={img.url} alt={img.caption || 'Attachment'} className="w-full h-20 object-cover" />
+                        {img.caption && (
+                          <div className="absolute inset-x-0 bottom-0 bg-slate-950/80 px-1.5 py-0.5 text-[9px] text-slate-200 truncate">
+                            {img.caption}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[10px] text-slate-400">
