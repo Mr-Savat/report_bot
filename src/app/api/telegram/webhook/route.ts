@@ -18,26 +18,28 @@ export async function POST(req: NextRequest) {
       const user = update.message.from;
       const userName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Engineer';
 
-      if (text.startsWith('/start') || text.startsWith('/report')) {
-        // Reply with Telegram Mini App Button
+      const isGroup = update.message.chat.type === 'group' || update.message.chat.type === 'supergroup';
+      const cleanText = text.toLowerCase().trim();
+
+      if (cleanText.startsWith('/start') || cleanText.startsWith('/report')) {
+        // In groups, Telegram requires direct Mini App URL; in private chats, it supports web_app object
+        const reportButton = isGroup
+          ? {
+              text: '📋 បើកទម្រង់របាយការណ៍ (Open Report)',
+              url: 'https://t.me/qb_tech_report_bot/report',
+            }
+          : {
+              text: '📋 បើកទម្រង់របាយការណ៍ (Open Report)',
+              web_app: { url: APP_URL },
+            };
+
         const replyPayload = {
           chat_id: chatId,
-          text: `👋 សួស្តី <b>${userName}</b>!\n\nសូមស្វាគមន៍មកកាន់ប្រព័ន្ធ <b>Cambo BIM Access Bot</b>។\n\nចុចប៊ូតុងខាងក្រោមដើម្បីបើកបំពេញរបាយការណ៍ការងារប្រចាំថ្ងៃ (Daily Site Report)៖`,
+          text: `👋 សួស្តី <b>${userName}</b>!\n\nសូមស្វាគមន៍មកកាន់ប្រព័ន្ធ <b>QB Report Bot</b>។\n\nចុចប៊ូតុងខាងក្រោមដើម្បីបើកបំពេញរបាយការណ៍ការដ្ឋានប្រចាំថ្ងៃ (Daily Site Report)៖`,
           parse_mode: 'HTML',
           reply_markup: {
             inline_keyboard: [
-              [
-                {
-                  text: '📋 បើកទម្រង់របាយការណ៍ (Open Report)',
-                  web_app: { url: APP_URL },
-                },
-              ],
-              [
-                {
-                  text: 'ℹ️ ជំនួយ និងការប្រើប្រាស់ (Help)',
-                  callback_data: 'help_info',
-                },
-              ],
+              [reportButton],
             ],
           },
         };

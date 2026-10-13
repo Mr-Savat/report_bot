@@ -58,7 +58,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
   // Load draft from localStorage on mount
   useEffect(() => {
     try {
-      const savedDraft = localStorage.getItem('cambo_bim_report_draft');
+      const savedDraft = localStorage.getItem('qb_report_draft');
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
         if (parsed.reporterName) setReporterName(parsed.reporterName);
@@ -94,7 +94,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
       tomorrowsPlan,
       savedAt: new Date().toISOString(),
     };
-    localStorage.setItem('cambo_bim_report_draft', JSON.stringify(draft));
+    localStorage.setItem('qb_report_draft', JSON.stringify(draft));
     setStatusMessage({
       type: 'info',
       text: '💾 បានរក្សាទុកក្នុងសេចក្តីព្រាង (Draft Saved) ដោយជោគជ័យ!',
@@ -152,7 +152,7 @@ export default function ReportForm({ currentUser, onSubmitted }: ReportFormProps
           type: 'success',
           text: '🎉 របាយការណ៍ត្រូវបានបញ្ជូនជោគជ័យ! ទិន្នន័យត្រូវបានរក្សាទុក និងផ្ញើទៅកាន់ក្រុម Telegram។',
         });
-        localStorage.removeItem('cambo_bim_report_draft');
+        localStorage.removeItem('qb_report_draft');
         setWorkSummary('');
         if (onSubmitted) onSubmitted();
       } else {

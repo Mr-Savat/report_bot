@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveReport, getReports, DailyReportData } from '@/lib/supabase';
-import { formatReportTelegramMessage, sendTelegramMessage } from '@/lib/telegram';
+import { formatReportTelegramMessage, sendTelegramMessage, checkGroupMembership } from '@/lib/telegram';
 
 export async function GET() {
   const reports = await getReports();
@@ -16,6 +16,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'សូមបំពេញព័ត៌មានដែលចាំបាច់ (Task, Date, Work Summary)' },
         { status: 400 }
+      );
+    }
+
+    // Verify membership: only members in QB Report Telegram group can submit
+    if (body.telegram_user_id) {
+      const membership = await checkGroupMembership(body.telegram_user_id);
+      if (!membership.isMember && process.env.NODE_ENV !== 'development') {
+        return NextResponse.json(
+          { success: false, error: 'ការចូលប្រើប្រាស់ត្រូវបានបដិសេធ៖ អ្នកពុំមែនជាសមាជិកក្នុងក្រុម QB Report ឡើយ!' },
+          { status: 403 }
+        );
+      }
+    } else if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json(
+        { success: false, error: 'សូមបើកបំពេញតាមរយៈកម្មវិធី Telegram ក្នុងក្រុម QB Report ប៉ុណ្ណោះ!' },
+        { status: 401 }
       );
     }
 

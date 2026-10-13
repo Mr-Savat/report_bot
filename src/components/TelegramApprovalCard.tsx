@@ -20,7 +20,7 @@ export default function TelegramApprovalCard() {
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
-                Cambo BIM Access Bot
+                QB Report Bot
               </span>
               <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 font-semibold px-1.5 py-0.2 rounded-full">
                 E2E Workflow
@@ -46,7 +46,7 @@ export default function TelegramApprovalCard() {
           <div className="bg-white/80 dark:bg-slate-900/80 rounded-xl p-3 border border-slate-200/60 dark:border-slate-800 space-y-1.5 font-mono text-[11px]">
             <div className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
               <span>🔔</span>
-              <span>NEW SIGN UP REQUEST (CAMBO BIM)</span>
+              <span>NEW SIGN UP REQUEST (QB REPORT)</span>
             </div>
             
             <div className="text-slate-700 dark:text-slate-300 flex items-center gap-1">

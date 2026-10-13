@@ -17,8 +17,8 @@ const kantumruy = Kantumruy_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "Cambo BIM - Daily Site Report",
-  description: "Telegram Mini App for Construction Daily Site Report",
+  title: "QB Report - Daily Site Report",
+  description: "Telegram Mini App for QB Tech Solution Daily Construction Site Report",
 };
 
 export default function RootLayout({

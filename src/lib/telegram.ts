@@ -113,6 +113,37 @@ ${report.issues_and_obstacles || 'មិនមានបញ្ហារាំង�
 ${report.tomorrows_plan || 'បន្តការងារតាមកាលវិភាគ'}
 
 ━━━━━━━━━━━━━━━━━━━━
-<i>រាយការណ៍តាម Cambo BIM Access Bot</i>
+<i>រាយការណ៍តាម QB Report Bot</i>
 `.trim();
 }
+
+/**
+ * Check if a Telegram user is an active member or admin of the group
+ */
+export async function checkGroupMembership(
+  userId: number,
+  chatId: string = TELEGRAM_CHAT_ID
+): Promise<{ isMember: boolean; status?: string; error?: string }> {
+  if (!TELEGRAM_BOT_TOKEN || !chatId) {
+    console.warn('Bot token or chat ID missing for membership check');
+    return { isMember: true, status: 'unconfigured_bypass' };
+  }
+
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getChatMember?chat_id=${encodeURIComponent(chatId)}&user_id=${userId}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.ok && data.result) {
+      const activeStatuses = ['creator', 'administrator', 'member', 'restricted'];
+      const isMember = activeStatuses.includes(data.result.status);
+      return { isMember, status: data.result.status };
+    }
+
+    return { isMember: false, status: data.description || 'not_member' };
+  } catch (err) {
+    console.error('Failed to check Telegram group membership:', err);
+    return { isMember: false, error: String(err) };
+  }
+}
+
